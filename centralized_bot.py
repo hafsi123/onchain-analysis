@@ -172,7 +172,8 @@ def get_binance_prices(df_hourly,s):
                 'Volume': volume,
                 'ema':None,
                 'upper_band':None,
-                'lower_band':None
+                'lower_band':None;
+                'onchain':None
             }, ignore_index=True)
     else:
         print(f"Error {response.status_code}: {response.text}")
@@ -228,7 +229,6 @@ for f in dfl :
 last_time = dfl[0]['Time'].iloc[-1]
 t = pd.to_datetime(last_time)
 last_hour = t.hour
-x =8
 while True:
     i=0
     for symbol in symbols :
@@ -257,11 +257,12 @@ while True:
             print("hour added")
             if i==5:
                 last_hour+=1
-                
+            last_rows = df['onchain'].tail(8)
+            mean_last= (last_rows.sum())/8    
         
         v= float(data[1])>=upper[i] or float(data[1])>=ema[i]
         
-        if (in_trade[i]==False) and (v==True)  :
+        if (in_trade[i]==False) and (v==True) and onchain(s)>mean_last  :
             print("----------------------")
             print("trade entry")
             print(symbol)
@@ -296,15 +297,7 @@ while True:
             if os.path.exists(file_path):
                 os.remove(file_path)
             trade[i].to_csv(file_path, index=False)
-        if x>0:
-            print(v)
-            print(data[1])
-            print(lower[i])
-            print(ema[i]) 
-            print(in_trade[i])
-            print(last_hour)
-            print(data[0].hour)
-            x-=1
+
         i+=1 
     time.sleep(20)
             
